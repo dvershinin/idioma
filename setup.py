@@ -33,6 +33,16 @@ def get_readme():
     return get_file(os.path.dirname(__file__), 'README.rst')
 
 
+tests_requires = [
+    'pytest',
+    'coveralls',
+]
+
+install_requires = [
+    'httpx~=0.25.0',
+]
+
+
 def install():
     setup(
         name='idioma',
@@ -55,14 +65,12 @@ def install():
                      'Programming Language :: Python :: 3.8'],
         packages=find_packages(exclude=['docs', 'tests']),
         keywords='google translate translator',
-        install_requires=[
-            'httpx~=0.25.0',
-        ],
-        python_requires= '>=3.8',
-        tests_require=[
-            'pytest',
-            'coveralls',
-        ],
+        install_requires=install_requires,
+        python_requires='>=3.8',
+        tests_require=tests_requires,
+        extras_require={
+            "tests": install_requires + tests_requires
+        },
         scripts=['translate']
     )
 
