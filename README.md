@@ -4,6 +4,7 @@
 [![PyPI version](https://badge.fury.io/py/idioma.svg)](https://badge.fury.io/py/lastversion)
 [![Documentation Status](https://readthedocs.org/projects/idioma/badge/?version=latest)](https://lastversion.getpagespeed.com/en/latest/?badge=latest)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/380e3a38dc524112b4dcfc0492d5b816)](https://www.codacy.com/manual/GetPageSpeed/lastversion?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dvershinin/lastversion&amp;utm_campaign=Badge_Grade)[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d838fd6899fd4f50ac463d54c94d09af)](https://app.codacy.com/gh/dvershinin/idioma/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/d838fd6899fd4f50ac463d54c94d09af)](https://app.codacy.com/gh/dvershinin/idioma/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![Buy Me a Coffee](https://img.shields.io/badge/dynamic/json?color=blue&label=Buy%20me%20a%20Coffee&prefix=%23&query=next_time_total&url=https%3A%2F%2Fwww.getpagespeed.com%2Fbuymeacoffee.json&logo=buymeacoffee)](https://www.buymeacoffee.com/dvershinin)
 
 
