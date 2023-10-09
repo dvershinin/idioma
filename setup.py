@@ -44,6 +44,7 @@ tests_requires = [
 
 install_requires = [
     'httpx~=0.25.0',
+    "h2>=3,<5"  # explicitly add HTTP/2 support
 ]
 
 
