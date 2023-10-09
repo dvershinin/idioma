@@ -7,10 +7,6 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/d838fd6899fd4f50ac463d54c94d09af)](https://app.codacy.com/gh/dvershinin/idioma/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![Buy Me a Coffee](https://img.shields.io/badge/dynamic/json?color=blue&label=Buy%20me%20a%20Coffee&prefix=%23&query=next_time_total&url=https%3A%2F%2Fwww.getpagespeed.com%2Fbuymeacoffee.json&logo=buymeacoffee)](https://www.buymeacoffee.com/dvershinin)
 
-
-|GitHub license| |travis status| |Documentation Status| |PyPI version|
-|Coverage Status| |Code Climate|
-
 Idioma is a **free** and **unlimited** python library that
 implemented Google Translate API. This uses the `Google Translate Ajax
 API <https://translate.google.com>`__ to make calls to such methods as
@@ -19,7 +15,7 @@ detect and translate.
 Compatible with Python 3.8+.
 
 For details refer to the `API
-Documentation <https://py-idioma.readthedocs.io/en/latest>`__.
+Documentation <https://idioma.readthedocs.io/en/latest>`__.
 
 Features
 --------
@@ -184,7 +180,7 @@ a given sentence.
     >>> translator.detect('Tiu frazo estas skribita en Esperanto.')
     # <Detected lang=eo confidence=0.10538048>
 
-Idioma as a command line application
+`translatee` is a command line application
 -----------------------------------------
 
 .. code:: bash
@@ -281,16 +277,3 @@ follows:
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-
-.. |GitHub license| image:: https://img.shields.io/github/license/mashape/apistatus.svg
-   :target: http://opensource.org/licenses/MIT
-.. |travis status| image:: https://travis-ci.org/ssut/py-idioma.svg?branch=master
-   :target: https://travis-ci.org/ssut/py-idioma
-.. |Documentation Status| image:: https://readthedocs.org/projects/py-idioma/badge/?version=latest
-   :target: https://readthedocs.org/projects/py-idioma/?badge=latest
-.. |PyPI version| image:: https://badge.fury.io/py/idioma.svg
-   :target: http://badge.fury.io/py/idioma
-.. |Coverage Status| image:: https://coveralls.io/repos/github/ssut/py-idioma/badge.svg
-   :target: https://coveralls.io/github/ssut/py-idioma
-.. |Code Climate| image:: https://codeclimate.com/github/ssut/py-idioma/badges/gpa.svg
-   :target: https://codeclimate.com/github/ssut/py-idioma
