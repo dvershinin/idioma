@@ -36,6 +36,7 @@ def get_readme():
 tests_requires = [
     'pytest',
     'flake8',
+    "pytest-cov"
 ]
 
 install_requires = [
