@@ -174,9 +174,13 @@ class Translator:
 
         return extra
 
-    def translate(self, text: str, dest='en', src='auto'):
+    @staticmethod
+    def validate_normalize_src_dest(src, dest):
         dest = dest.lower().split('_', 1)[0]
-        src = src.lower().split('_', 1)[0]
+        if src:
+            src = src.lower().split('_', 1)[0]
+        else:
+            src = 'auto'
 
         if src != 'auto' and src not in LANGUAGES:
             if src in SPECIAL_CASES:
@@ -193,6 +197,10 @@ class Translator:
                 dest = LANGCODES[dest]
             else:
                 raise ValueError('invalid destination language')
+        return src, dest
+
+    def translate(self, text: str, dest='en', src=None):
+        src, dest = self.validate_normalize_src_dest(src, dest)
 
         origin = text
         data, response = self._translate(text, dest, src)
@@ -308,24 +316,7 @@ class Translator:
             jumps over  ->  이상 점프
             the lazy dog  ->  게으른 개
         """
-        dest = dest.lower().split('_', 1)[0]
-        src = src.lower().split('_', 1)[0]
-
-        if src != 'auto' and src not in LANGUAGES:
-            if src in SPECIAL_CASES:
-                src = SPECIAL_CASES[src]
-            elif src in LANGCODES:
-                src = LANGCODES[src]
-            else:
-                raise ValueError('invalid source language')
-
-        if dest not in LANGUAGES:
-            if dest in SPECIAL_CASES:
-                dest = SPECIAL_CASES[dest]
-            elif dest in LANGCODES:
-                dest = LANGCODES[dest]
-            else:
-                raise ValueError('invalid destination language')
+        src, dest = self.validate_normalize_src_dest(src, dest)
 
         if isinstance(text, list):
             result = []
