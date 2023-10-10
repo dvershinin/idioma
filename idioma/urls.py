@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Predefined URLs used to make google translate requests.
+Predefined URLs used to make Google translate requests.
 """
 BASE = 'https://translate.google.com'
 TRANSLATE = 'https://{host}/translate_a/single'

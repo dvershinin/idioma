@@ -1,6 +1,9 @@
 """A conversion module for idioma"""
 import json
 import re
+from unicodedata import lookup
+
+from idioma.constants import PRIMARY_COUNTRY
 
 
 def build_params(client, query, src, dest, token, override):
@@ -79,3 +82,14 @@ def rshift(val, n):
     """python port for '>>>'(right shift with padding)
     """
     return (val % 0x100000000) >> n
+
+
+def get_flag(lang_code):
+    """Get country flag emoji from language code"""
+    # first, get primary country for this language
+    country_code = PRIMARY_COUNTRY.get(lang_code)
+    if country_code:
+        flag = (lookup(f"REGIONAL INDICATOR SYMBOL LETTER {country_code[0]}") +
+                lookup(f"REGIONAL INDICATOR SYMBOL LETTER {country_code[1]}"))
+        return flag
+    return None
