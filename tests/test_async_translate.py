@@ -1,0 +1,53 @@
+import asyncio
+import time
+
+import pytest
+
+from idioma import AsyncTranslator, Translator
+
+# Number of translations to perform for the test
+NUM_TRANSLATIONS = 2  # Adjust this to a small number for the test
+
+
+@pytest.mark.asyncio
+async def test_async_translation():
+    async with AsyncTranslator() as translator:
+        text_to_translate = "Hello, world!"
+        destination_language = "fr"
+        translation = await translator.translate(text_to_translate,
+                                                 dest=destination_language)
+        assert translation is not None
+        assert translation.src == "en"  # Ensure the source language is correctly detected
+        assert translation.dest == destination_language
+        assert translation.text is not None
+        assert translation.text == "Bonjour le monde!"  # Check that translation is different from the input text
+
+
+@pytest.mark.asyncio
+async def test_async_is_faster_than_sync():
+    translator = Translator()
+    async_translator = AsyncTranslator()
+
+    async def translate_sync():
+        for _ in range(NUM_TRANSLATIONS):
+            translation = translator.translate("Hello, world!", dest='fr')
+
+    async def translate_async():
+        tasks = []
+        for _ in range(NUM_TRANSLATIONS):
+            task = async_translator.translate("Hello, world!", dest='fr')
+            tasks.append(task)
+        await asyncio.gather(*tasks)
+
+    sync_start_time = time.time()
+    await translate_sync()
+    sync_end_time = time.time()
+    sync_elapsed_time = sync_end_time - sync_start_time
+
+    async_start_time = time.time()
+    await translate_async()
+    async_end_time = time.time()
+    async_elapsed_time = async_end_time - async_start_time
+
+    # Assert that the asynchronous version is faster than the synchronous version
+    assert async_elapsed_time < sync_elapsed_time

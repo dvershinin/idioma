@@ -56,8 +56,8 @@ def legacy_format_json(original):
         if i % 2 == 0:
             j = int(i / 2)
             nxt = text.find('"', p)
-            # replacing a portion of a string
-            # use slicing to extract those parts of the original string to be kept
+            # replacing a portion of a string use slicing to extract those
+            # parts of the original string to be kept
             text = text[:p] + states[j][1] + text[nxt:]
 
     converted = json.loads(text)

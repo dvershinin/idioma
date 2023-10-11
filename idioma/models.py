@@ -20,6 +20,8 @@ class TranslatedPart:
             'text': self.text,
             'candidates': self.candidates,
         }
+
+
 class Translated(Base):
     """Translate result object
 
@@ -30,8 +32,9 @@ class Translated(Base):
     :param pronunciation: pronunciation
     """
 
-    def __init__(self, src, dest, origin, text, pronunciation, parts: List[TranslatedPart],
-                extra_data=None, **kwargs):
+    def __init__(self, src, dest, origin, text, pronunciation,
+                 parts: List[TranslatedPart],
+                 extra_data=None, **kwargs):
         super().__init__(**kwargs)
         self.src = src
         self.dest = dest
@@ -64,6 +67,7 @@ class Translated(Base):
             'extra_data': self.extra_data,
             'parts': list(map(lambda part: part.__dict__(), self.parts)),
         }
+
 
 class Detected(Base):
     """Language detection result object
