@@ -369,8 +369,8 @@ class BaseTranslator(ABC):
 
     def handle_legacy_translate_response(self, response, text):
         if response.status_code == 200:
-            data = utils.format_json(r.text)
-            return data, r
+            data = utils.format_json(response.text)
+            return data, response
 
         if self.raise_exception:
             raise Exception('Unexpected status code "{}" from {}'.format(
