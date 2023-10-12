@@ -25,7 +25,7 @@ async def test_async_translation():
 
 @pytest.mark.asyncio
 async def test_async_translate_thai_lang_detect():
-    async with (AsyncTranslator() as translator):
+    async with AsyncTranslator() as translator:
         detection = await translator.detect('안녕하세요')
         assert detection.lang == 'ko'
 
