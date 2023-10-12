@@ -15,12 +15,15 @@ from idioma.models import Detected
 class AsyncTranslator(BaseTranslator):
 
     def _create_client(self):
-        return httpx.AsyncClient(http2=self.http2, proxies=self.proxies, timeout=self.timeout)
+        return httpx.AsyncClient(http2=self.http2, proxies=self.proxies,
+                                 timeout=self.timeout)
 
     def _get_token_acquirer(self):
-        return AsyncTokenAcquirer(client=self.client, host=self.service_urls[0])
+        return AsyncTokenAcquirer(client=self.client,
+                                  host=self.service_urls[0])
 
-    async def prepare_translate_legacy_params(self, text, src, dest, override):
+    async def prepare_translate_legacy_params(self, text, src, dest,
+                                              override=None):
         token = ''  # dummy default value here as it is not used by api client
         if self.client_type == 'webapp':
             token = await self.token_acquirer.do(text)
@@ -45,10 +48,11 @@ class AsyncTranslator(BaseTranslator):
 
         return r.text, r
 
-
     async def _translate_legacy(self, text, dest, src, override):
 
-        url, params = await  self.prepare_translate_legacy_params(text, src, dest, override)
+        url, params = await self.prepare_translate_legacy_params(text, src,
+                                                                 dest,
+                                                                 override)
         response = await self.client.get(url, params=params)
         return self.handle_legacy_translate_response(response, text)
 
@@ -64,7 +68,6 @@ class AsyncTranslator(BaseTranslator):
                                                                None),
                           response=translated._response)
         return result
-
 
     def detect_legacy(self, text, **kwargs):
         """Detect language of the input text
@@ -173,11 +176,12 @@ class AsyncTranslator(BaseTranslator):
         if isinstance(text, list):
             result = []
             for item in text:
-                translated = await self.translate_legacy(item, dest=dest, src=src,
-                                                   **kwargs)
+                translated = await self.translate_legacy(item, dest=dest,
+                                                         src=src,
+                                                         **kwargs)
                 result.append(translated)
             return result
 
-        data, response = self.translate_legacy(text, dest, src)
+        data, response = self._translate_legacy(text, dest, src, kwargs)
 
         return self.parse_legacy_response(data, src, dest, text, response)

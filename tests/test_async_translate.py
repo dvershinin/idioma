@@ -6,7 +6,7 @@ import pytest
 from idioma import AsyncTranslator, Translator
 
 # Number of translations to perform for the test
-NUM_TRANSLATIONS = 3  # Adjust this to a small number for the test
+NUM_TRANSLATIONS = 10  # Adjust this to a small number for the test
 
 
 @pytest.mark.asyncio

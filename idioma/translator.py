@@ -37,9 +37,64 @@ class Translator(BaseTranslator):
 
     def _translate_legacy(self, text, dest, src, override):
 
-        url, params = self.prepare_translate_legacy_params(text, src, dest, override)
+        url, params = self.prepare_translate_legacy_params(text, src, dest,
+                                                           override)
         response = self.client.get(url, params=params)
         return self.handle_legacy_translate_response(response, text)
+
+    def translate_legacy(self, text, dest='en', src='auto', **kwargs):
+        """Translate text from source language to destination language
+
+        :param text: The source text(s) to be translated. Batch translation is supported via sequence input.
+        :type text: UTF-8 :class:`str`; :class:`unicode`; string sequence (list, tuple, iterator, generator)
+
+        :param dest: The language to translate the source text into.
+                     The value should be one of the language codes listed in :const:`idioma.LANGUAGES`
+                     or one of the language names listed in :const:`idioma.LANGCODES`.
+        :param dest: :class:`str`; :class:`unicode`
+
+        :param src: The language of the source text.
+                    The value should be one of the language codes listed in :const:`idioma.LANGUAGES`
+                    or one of the language names listed in :const:`idioma.LANGCODES`.
+                    If a language is not specified,
+                    the system will attempt to identify the source language automatically.
+        :param src: :class:`str`; :class:`unicode`
+
+        :rtype: Translated
+        :rtype: :class:`list` (when a list is passed)
+
+        Basic usage:
+            >>> from idioma import Translator
+            >>> translator = Translator()
+            >>> translator.translate('안녕하세요.')
+            <Translated src=ko dest=en text=Good evening. pronunciation=Good evening.>
+            >>> translator.translate('안녕하세요.', dest='ja')
+            <Translated src=ko dest=ja text=こんにちは。 pronunciation=Kon'nichiwa.>
+            >>> translator.translate('veritas lux mea', src='la')
+            <Translated src=la dest=en text=The truth is my light pronunciation=The truth is my light>
+
+        Advanced usage:
+            >>> translations = translator.translate(['The quick brown fox', 'jumps over', 'the lazy dog'], dest='ko')
+            >>> for translation in translations:
+            ...    print(translation.origin, ' -> ', translation.text)
+            The quick brown fox  ->  빠른 갈색 여우
+            jumps over  ->  이상 점프
+            the lazy dog  ->  게으른 개
+        """
+        src, dest = self.validate_normalize_src_dest(src, dest)
+
+        if isinstance(text, list):
+            result = []
+            for item in text:
+                translated = self.translate_legacy(item, dest=dest, src=src,
+                                                   **kwargs)
+                result.append(translated)
+            return result
+
+        origin = text
+        data, response = self._translate_legacy(text, dest, src)
+
+        return self.parse_legacy_response(data, src, dest, origin, response)
 
     def translate(self, text: str, dest='en', src=None):
         src, dest = self.validate_normalize_src_dest(src, dest)
