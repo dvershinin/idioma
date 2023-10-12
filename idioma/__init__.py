@@ -3,6 +3,6 @@ __all__ = ['Translator', 'AsyncTranslator']
 __version__ = '0.0.4'
 
 
-from idioma.client import Translator
-from idioma.async_client import AsyncTranslator
+from idioma.async_translator import AsyncTranslator
 from idioma.constants import LANGCODES, LANGUAGES  # noqa
+from idioma.translator import Translator

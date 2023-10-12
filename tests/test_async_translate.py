@@ -6,7 +6,7 @@ import pytest
 from idioma import AsyncTranslator, Translator
 
 # Number of translations to perform for the test
-NUM_TRANSLATIONS = 2  # Adjust this to a small number for the test
+NUM_TRANSLATIONS = 3  # Adjust this to a small number for the test
 
 
 @pytest.mark.asyncio
@@ -24,6 +24,13 @@ async def test_async_translation():
 
 
 @pytest.mark.asyncio
+async def test_async_translate_thai_lang_detect():
+    async with (AsyncTranslator() as translator):
+        detection = await translator.detect('안녕하세요')
+        assert detection.lang == 'ko'
+
+
+@pytest.mark.asyncio
 async def test_async_is_faster_than_sync():
     translator = Translator()
     async_translator = AsyncTranslator()
@@ -31,6 +38,7 @@ async def test_async_is_faster_than_sync():
     async def translate_sync():
         for _ in range(NUM_TRANSLATIONS):
             translation = translator.translate("Hello, world!", dest='fr')
+            assert translation.text == "Bonjour le monde!"
 
     async def translate_async():
         tasks = []
@@ -49,5 +57,6 @@ async def test_async_is_faster_than_sync():
     async_end_time = time.time()
     async_elapsed_time = async_end_time - async_start_time
 
-    # Assert that the asynchronous version is faster than the synchronous version
+    # Assert that the asynchronous version is faster than the synchronous
+    # version
     assert async_elapsed_time < sync_elapsed_time

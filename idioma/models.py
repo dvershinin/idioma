@@ -1,5 +1,6 @@
-from httpx import Response
 from typing import List
+
+from httpx import Response
 
 
 class Base:
