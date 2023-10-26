@@ -31,6 +31,15 @@ async def test_async_translate_thai_lang_detect():
 
 
 @pytest.mark.asyncio
+async def test_async_translate_thai_explicit():
+    async with AsyncTranslator() as translator:
+        translation = await translator.translate(
+            'แต่ส่งได้แค่คำว่าทำไม', src='th', dest='en'
+        )
+        assert translation.text == 'But can only send the word'
+
+
+@pytest.mark.asyncio
 async def test_async_is_faster_than_sync():
     translator = Translator()
     async_translator = AsyncTranslator()

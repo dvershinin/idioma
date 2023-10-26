@@ -14,3 +14,9 @@ def test_translate_thai_hello_src_none_auto():
 def test_translate_thai_lang_detect():
     translator = Translator()
     assert translator.detect('안녕하세요').lang == 'ko'
+
+
+def test_translate_legacy_russian_lang_hello():
+    translator = Translator()
+    assert translator.translate_legacy(
+        'Привет', src='ru', dest='en').text == 'Hello'

@@ -35,7 +35,7 @@ class Translator(BaseTranslator):
         url = urls.TRANSLATE.format(host=self._pick_service_url())
         return url, params
 
-    def _translate_legacy(self, text, dest, src, override):
+    def _translate_legacy(self, text, dest, src, override=None):
 
         url, params = self.prepare_translate_legacy_params(text, src, dest,
                                                            override)

@@ -15,6 +15,7 @@ from idioma.models import Detected
 class AsyncTranslator(BaseTranslator):
 
     def _create_client(self):
+        transport = httpx.AsyncHTTPTransport(retries=3)
         return httpx.AsyncClient(http2=self.http2, proxies=self.proxies,
                                  timeout=self.timeout)
 
@@ -113,7 +114,7 @@ class AsyncTranslator(BaseTranslator):
 
     async def __aenter__(self):
         # Initialize the httpx.AsyncClient here
-        self.client = httpx.AsyncClient(http2=self.http2)
+        self.client = self._create_client()
 
         if self.proxies is not None:
             self.client.proxies = self.proxies

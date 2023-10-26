@@ -299,6 +299,7 @@ class BaseTranslator(ABC):
         result = Translated(src=src, dest=dest, origin=origin,
                             text=translated, pronunciation=pron,
                             extra_data=extra_data,
+                            parts=[],
                             response=response)
 
         return result
