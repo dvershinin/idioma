@@ -22,6 +22,7 @@ from idioma.constants import (
 )
 from idioma.gtoken import TokenAcquirer
 from idioma.models import Translated, Detected, TranslatedPart
+from idioma.retry_transport import RetryTransport
 
 
 class BaseTranslator(ABC):
@@ -101,7 +102,18 @@ class BaseTranslator(ABC):
         self.raise_exception = raise_exception
 
     def _create_client(self):
-        return httpx.Client(http2=self.http2, proxies=self.proxies)
+        retry_transport = RetryTransport(
+            wrapped_transport=httpx.HTTPTransport(retries=3),
+            retryable_methods={'GET', 'POST'},
+            # Google would take too "sorry" page sometimes with 302
+            retry_status_codes={302}
+        )
+        return httpx.Client(
+            http2=self.http2,
+            proxies=self.proxies,
+            transport=retry_transport,
+            timeout=self.timeout
+        )
 
     def _get_token_acquirer(self):
         return TokenAcquirer(client=self.client, host=self.service_urls[0])
