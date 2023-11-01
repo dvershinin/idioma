@@ -10,14 +10,27 @@ from idioma import urls, utils
 from idioma.async_gtoken import AsyncTokenAcquirer
 from idioma.base_translator import BaseTranslator
 from idioma.models import Detected
+from idioma.retry_transport import RetryTransport
 
 
 class AsyncTranslator(BaseTranslator):
 
     def _create_client(self):
-        transport = httpx.AsyncHTTPTransport(retries=3)
-        return httpx.AsyncClient(http2=self.http2, proxies=self.proxies,
-                                 timeout=self.timeout)
+        # wrapped transport ensures that the client will retry on failure
+        # of connections, not based on status codes
+        # retry transport is used to retry on status codes
+        retry_transport = RetryTransport(
+            wrapped_transport=httpx.AsyncHTTPTransport(retries=3),
+            retryable_methods={'GET', 'POST'},
+            # Google would take too "sorry" page sometimes with 302
+            retry_status_codes={302}
+        )
+        return httpx.AsyncClient(
+            http2=self.http2,
+            proxies=self.proxies,
+            timeout=self.timeout,
+            transport=retry_transport
+        )
 
     def _get_token_acquirer(self):
         return AsyncTokenAcquirer(client=self.client,
@@ -43,7 +56,7 @@ class AsyncTranslator(BaseTranslator):
         }
         r = await self.client.post(url, params=self.POST_PARAMS, data=data)
 
-        if r.status_code != 200 and self.raise_Exception:
+        if r.status_code != 200 and self.raise_exception:
             raise Exception('Unexpected status code "{}" from {}'.format(
                 r.status_code, self.service_urls))
 

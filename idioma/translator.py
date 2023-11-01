@@ -17,7 +17,7 @@ class Translator(BaseTranslator):
         }
         r = self.client.post(url, params=self.POST_PARAMS, data=data)
 
-        if r.status_code != 200 and self.raise_Exception:
+        if r.status_code != 200 and self.raise_exception:
             raise Exception('Unexpected status code "{}" from {}'.format(
                 r.status_code, self.service_urls))
 

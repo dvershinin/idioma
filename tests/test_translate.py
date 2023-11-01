@@ -20,3 +20,12 @@ def test_translate_legacy_russian_lang_hello():
     translator = Translator()
     assert translator.translate_legacy(
         'Привет', src='ru', dest='en').text == 'Hello'
+
+
+def test_translate_russian_lang_hello_evade_rate_limit(capsys):
+    translator = Translator(raise_exception=True)
+    for i in range(1000):
+        translated = translator.translate(
+            f'Привет #{i}', src='ru', dest='en').text
+        print(f"Translated: {translated}")
+        assert translated in [f'Hello #{i}', f'Hi #{i}', f'Hi: #{i}', f"Hi: {i}"]

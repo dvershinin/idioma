@@ -68,7 +68,7 @@ class BaseTranslator(ABC):
                  user_agent=DEFAULT_USER_AGENT,
                  raise_exception=DEFAULT_RAISE_EXCEPTION,
                  proxies: typing.Dict[str, httpcore.AsyncHTTPProxy] = None,
-                 timeout: Timeout = None,
+                 timeout: Timeout = 3,
                  http2=True,
                  use_fallback=False):
 

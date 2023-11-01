@@ -69,3 +69,14 @@ async def test_async_is_faster_than_sync():
     # Assert that the asynchronous version is faster than the synchronous
     # version
     assert async_elapsed_time < sync_elapsed_time
+
+
+@pytest.mark.asyncio
+async def test_translate_russian_lang_hello_evade_rate_limit(capsys):
+    translator = AsyncTranslator()
+    for i in range(1000):
+        translation = await translator.translate(
+            f'Привет #{i}', src='ru', dest='en')
+        translated = translation.text
+        print(f"Translated: {translated}")
+        assert translated in [f'Hello #{i}', f'Hi #{i}', f'Hi: #{i}', f"Hi: {i}"]
