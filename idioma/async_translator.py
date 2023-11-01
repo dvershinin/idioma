@@ -20,7 +20,7 @@ class AsyncTranslator(BaseTranslator):
         # of connections, not based on status codes
         # retry transport is used to retry on status codes
         retry_transport = RetryTransport(
-            wrapped_transport=httpx.AsyncHTTPTransport(retries=3),
+            wrapped_transport=httpx.AsyncHTTPTransport(retries=10),
             retryable_methods={'GET', 'POST'},
             # Google would take too "sorry" page sometimes with 302
             retry_status_codes={302}

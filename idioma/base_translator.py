@@ -103,7 +103,7 @@ class BaseTranslator(ABC):
 
     def _create_client(self):
         retry_transport = RetryTransport(
-            wrapped_transport=httpx.HTTPTransport(retries=3),
+            wrapped_transport=httpx.HTTPTransport(retries=10),
             retryable_methods={'GET', 'POST'},
             # Google would take too "sorry" page sometimes with 302
             retry_status_codes={302}
