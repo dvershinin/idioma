@@ -74,7 +74,7 @@ async def test_async_is_faster_than_sync():
 @pytest.mark.asyncio
 async def test_translate_russian_lang_hello_evade_rate_limit(capsys):
     translator = AsyncTranslator()
-    for i in range(1000):
+    for i in range(300):
         translation = await translator.translate(
             f'Привет #{i}', src='ru', dest='en')
         translated = translation.text

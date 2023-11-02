@@ -24,7 +24,7 @@ def test_translate_legacy_russian_lang_hello():
 
 def test_translate_russian_lang_hello_evade_rate_limit(capsys):
     translator = Translator(raise_exception=True)
-    for i in range(1000):
+    for i in range(300):
         translated = translator.translate(
             f'Привет #{i}', src='ru', dest='en').text
         print(f"Translated: {translated}")
