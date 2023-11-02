@@ -15,7 +15,7 @@ from idioma.retry_transport import RetryTransport
 
 class AsyncTranslator(BaseTranslator):
 
-    def _create_client(self):
+    def _create_client(self) -> httpx.AsyncClient:
         # wrapped transport ensures that the client will retry on failure
         # of connections, not based on status codes
         # retry transport is used to retry on status codes
