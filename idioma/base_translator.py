@@ -20,6 +20,7 @@ from idioma.constants import (
     DEFAULT_USER_AGENT, LANGCODES, LANGUAGES, SPECIAL_CASES,
     DEFAULT_RAISE_EXCEPTION, DUMMY_DATA
 )
+from idioma.exceptions import EmptyTranslationData
 from idioma.gtoken import TokenAcquirer
 from idioma.models import Translated, Detected, TranslatedPart
 from idioma.retry_transport import RetryTransport
@@ -184,7 +185,7 @@ class BaseTranslator(ABC):
                 raise ValueError('invalid destination language')
         return src, dest
 
-    def parse_response(self, src, dest, origin, data, response):
+    def parse_response(self, src, dest, origin, data, response: httpx.Response):
         token_found = False
         square_bracket_counts = [0, 0]
         resp = ''
@@ -208,6 +209,9 @@ class BaseTranslator(ABC):
                 break
 
         data = json.loads(resp)
+        if data[0][2] is None:
+            # Failed translation
+            raise EmptyTranslationData(f"Empty translation data: {data}")
         parsed = json.loads(data[0][2])
         # not sure
         should_spacing = parsed[1][0][0][3]

@@ -9,6 +9,7 @@ import httpx
 from idioma import urls, utils
 from idioma.async_gtoken import AsyncTokenAcquirer
 from idioma.base_translator import BaseTranslator
+from idioma.exceptions import EmptyTranslationData
 from idioma.models import Detected
 from idioma.retry_transport import RetryTransport
 
@@ -73,7 +74,10 @@ class AsyncTranslator(BaseTranslator):
     async def translate(self, text: str, dest='en', src=None):
         src, dest = self.validate_normalize_src_dest(src, dest)
         data, response = await self._translate(text, dest, src)
-        return self.parse_response(src, dest, text, data, response)
+        try:
+            return self.parse_response(src, dest, text, data, response)
+        except EmptyTranslationData:
+            return await self.translate_legacy(text, dest=dest, src=src)
 
     async def detect(self, text: str):
         translated = await self.translate(text, src='auto', dest='en')
