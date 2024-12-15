@@ -58,7 +58,7 @@ def install():
         license='MIT',
         author='SuHun Han',
         author_email='ssut' '@' 'ssut.me',
-        url='https://github.com/ssut/py-idioma',
+        url='https://github.com/dvershinin/idioma',
         classifiers=['Development Status :: 5 - Production/Stable',
                      'Intended Audience :: Education',
                      'Intended Audience :: End Users/Desktop',

@@ -64,7 +64,7 @@ class BaseTokenAcquirer:
             code = code.encode().decode('unicode-escape')
         except AttributeError:
             raise Exception(
-                'Could not find TKK token for this request.\nSee https://github.com/ssut/py-idioma/issues/234 for more details.')
+                'Could not find TKK token for this request.\nSee https://github.com/dvershinin/idioma/issues/234 for more details.')
         except:
             raise
 
