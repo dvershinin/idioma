@@ -44,7 +44,8 @@ tests_requires = [
 ]
 
 install_requires = [
-    'httpx~=0.25.0',
+    # 0.28.0 removed proxies parameter to Client
+    'httpx>=0.25.0,<0.28.0',
     "h2>=3,<5"  # explicitly add HTTP/2 support
 ]
 
