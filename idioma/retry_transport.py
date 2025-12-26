@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import email.utils
 import random
 import time
 from datetime import datetime, timezone
@@ -193,16 +194,28 @@ class RetryTransport(httpx.AsyncBaseTransport, httpx.BaseTransport):
                 return float(retry_after_header)
 
             try:
-                if retry_after_header.endswith('Z'):
-                    retry_after_header = retry_after_header[:-1]
-
-                parsed_date = datetime.fromisoformat(
-                    retry_after_header).astimezone(timezone.utc).astimezone()
+                # Retry-After may be either an HTTP-date (preferred) or a date-like string.
+                parsed_date = email.utils.parsedate_to_datetime(retry_after_header)
+                if parsed_date.tzinfo is None:
+                    parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+                parsed_date = parsed_date.astimezone(timezone.utc).astimezone()
                 diff = (parsed_date - datetime.now().astimezone()).total_seconds()
                 if diff > 0:
                     return min(diff, self._max_backoff_wait)
-            except ValueError:
-                pass
+            except (ValueError, TypeError):
+                # Fallback: best-effort ISO parsing (some servers send this)
+                try:
+                    iso = retry_after_header[:-1] if retry_after_header.endswith("Z") else retry_after_header
+                    parsed_date = (
+                        datetime.fromisoformat(iso)
+                        .astimezone(timezone.utc)
+                        .astimezone()
+                    )
+                    diff = (parsed_date - datetime.now().astimezone()).total_seconds()
+                    if diff > 0:
+                        return min(diff, self._max_backoff_wait)
+                except Exception:
+                    pass
 
         backoff = self._backoff_factor * (2 ** (attempts_made - 1))
         jitter = (backoff * self._jitter_ratio) * random.choice([1, -1])
@@ -217,17 +230,18 @@ class RetryTransport(httpx.AsyncBaseTransport, httpx.BaseTransport):
         remaining_attempts = self._max_attempts
         attempts_made = 0
         while True:
-            if attempts_made > 0:
-                await asyncio.sleep(self._calculate_sleep(attempts_made, {}))
             response = await send_method(request)
             if (
-                remaining_attempts < 1
+                remaining_attempts <= 1
                 or response.status_code not in self._retry_status_codes
             ):
                 return response
-            await response.aclose()
+            # Compute wait based on the response headers (Retry-After) if present.
             attempts_made += 1
+            wait_s = self._calculate_sleep(attempts_made, response.headers)
+            await response.aclose()
             remaining_attempts -= 1
+            await asyncio.sleep(wait_s)
 
     def _retry_operation(
         self,
@@ -237,14 +251,15 @@ class RetryTransport(httpx.AsyncBaseTransport, httpx.BaseTransport):
         remaining_attempts = self._max_attempts
         attempts_made = 0
         while True:
-            if attempts_made > 0:
-                time.sleep(self._calculate_sleep(attempts_made, {}))
             response = send_method(request)
             if (
-                remaining_attempts < 1
+                remaining_attempts <= 1
                 or response.status_code not in self._retry_status_codes
             ):
                 return response
-            response.close()
+            # Compute wait based on the response headers (Retry-After) if present.
             attempts_made += 1
+            wait_s = self._calculate_sleep(attempts_made, response.headers)
+            response.close()
             remaining_attempts -= 1
+            time.sleep(wait_s)

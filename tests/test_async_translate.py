@@ -36,7 +36,7 @@ async def test_async_translate_thai_explicit():
         translation = await translator.translate(
             'แต่ส่งได้แค่คำว่าทำไม', src='th', dest='en'
         )
-        assert translation.text == 'But can only send the word'
+        assert translation.text == 'But can only send the word "why"'
 
 
 @pytest.mark.asyncio

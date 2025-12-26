@@ -72,23 +72,14 @@ class BaseTranslator(ABC):
                  proxies: typing.Dict[str, httpcore.AsyncHTTPProxy] = None,
                  timeout: Timeout = 30,
                  http2=True,
-                 use_fallback=False):
+                 use_fallback=False,
+                 lazy_client: bool = False):
 
         # for aenter
         self.http2 = http2
         self.proxies = proxies
         self.user_agent = user_agent
         self.timeout = timeout
-
-        self.client = self._create_client()
-
-        self.client.headers.update({
-            'User-Agent': user_agent,
-            'Referer': 'https://translate.google.com',
-        })
-
-        if timeout is not None:
-            self.client.timeout = timeout
 
         if use_fallback:
             self.service_urls = DEFAULT_FALLBACK_SERVICE_URLS
@@ -98,9 +89,13 @@ class BaseTranslator(ABC):
             # default way of working: use the defined values from user app
             self.service_urls = service_urls
             self.client_type = 'tw-ob'
-            self.token_acquirer = self._get_token_acquirer()
+            self.token_acquirer = None
 
         self.raise_exception = raise_exception
+        self.client = None
+
+        if not lazy_client:
+            self._ensure_client()
 
     def _create_client(self):
         retry_transport = RetryTransport(
@@ -109,12 +104,42 @@ class BaseTranslator(ABC):
             # Google would take too "sorry" page sometimes with 302
             retry_status_codes={302}
         )
-        return httpx.Client(
-            http2=self.http2,
-            proxies=self.proxies,
-            transport=retry_transport,
-            timeout=self.timeout
-        )
+        # httpx<0.28 uses `proxies=...`, httpx>=0.28 uses `proxy=...`
+        try:
+            return httpx.Client(
+                http2=self.http2,
+                proxies=self.proxies,
+                transport=retry_transport,
+                timeout=self.timeout
+            )
+        except TypeError:
+            return httpx.Client(
+                http2=self.http2,
+                proxy=self.proxies,
+                transport=retry_transport,
+                timeout=self.timeout
+            )
+
+    def _ensure_client(self):
+        """Ensure self.client is initialized and configured."""
+        if self.client is not None:
+            return
+
+        self.client = self._create_client()
+        self.client.headers.update({
+            'User-Agent': self.user_agent,
+            'Referer': 'https://translate.google.com',
+        })
+        if self.timeout is not None:
+            self.client.timeout = self.timeout
+
+        # token acquirer depends on the client, so ensure it's bound to the same one
+        if (
+            getattr(self, "client_type", None) != "gtx"
+            and getattr(self, "token_acquirer", None) is None
+            and getattr(self, "service_urls", None)
+        ):
+            self.token_acquirer = self._get_token_acquirer()
 
     def _get_token_acquirer(self):
         return TokenAcquirer(client=self.client, host=self.service_urls[0])

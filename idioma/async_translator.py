@@ -4,6 +4,7 @@ An Async Translation module.
 
 You can translate text using this module, asynchronously.
 """
+import asyncio
 import httpx
 
 from idioma import urls, utils
@@ -16,6 +17,9 @@ from idioma.retry_transport import RetryTransport
 
 class AsyncTranslator(BaseTranslator):
 
+    def __init__(self, *args, lazy_client: bool = True, **kwargs):
+        super().__init__(*args, lazy_client=lazy_client, **kwargs)
+
     def _create_client(self) -> httpx.AsyncClient:
         # wrapped transport ensures that the client will retry on failure
         # of connections, not based on status codes
@@ -26,12 +30,21 @@ class AsyncTranslator(BaseTranslator):
             # Google would take too "sorry" page sometimes with 302
             retry_status_codes={302}
         )
-        return httpx.AsyncClient(
-            http2=self.http2,
-            proxies=self.proxies,
-            timeout=self.timeout,
-            transport=retry_transport
-        )
+        # httpx<0.28 uses `proxies=...`, httpx>=0.28 uses `proxy=...`
+        try:
+            return httpx.AsyncClient(
+                http2=self.http2,
+                proxies=self.proxies,
+                timeout=self.timeout,
+                transport=retry_transport
+            )
+        except TypeError:
+            return httpx.AsyncClient(
+                http2=self.http2,
+                proxy=self.proxies,
+                timeout=self.timeout,
+                transport=retry_transport
+            )
 
     def _get_token_acquirer(self):
         return AsyncTokenAcquirer(client=self.client,
@@ -72,6 +85,7 @@ class AsyncTranslator(BaseTranslator):
         return self.handle_legacy_translate_response(response, text)
 
     async def translate(self, text: str, dest='en', src=None):
+        self._ensure_client()
         src, dest = self.validate_normalize_src_dest(src, dest)
         data, response = await self._translate(text, dest, src)
         try:
@@ -80,6 +94,7 @@ class AsyncTranslator(BaseTranslator):
             return await self.translate_legacy(text, dest=dest, src=src)
 
     async def detect(self, text: str):
+        self._ensure_client()
         translated = await self.translate(text, src='auto', dest='en')
         result = Detected(lang=translated.src,
                           confidence=translated.extra_data.get('confidence',
@@ -87,7 +102,7 @@ class AsyncTranslator(BaseTranslator):
                           response=translated._response)
         return result
 
-    def detect_legacy(self, text, **kwargs):
+    async def detect_legacy(self, text, **kwargs):
         """Detect language of the input text
 
         :param text: The source text(s) whose language you want to identify.
@@ -118,37 +133,26 @@ class AsyncTranslator(BaseTranslator):
             en 0.96954316
             fr 0.043500196
         """
+        self._ensure_client()
         if isinstance(text, list):
-            result = []
-            for item in text:
-                lang = self.detect(item)
-                result.append(lang)
-            return result
+            return await asyncio.gather(*(self.detect(item) for item in text))
 
-        data, response = self._translate_legacy(text, 'en', 'auto', kwargs)
+        data, response = await self._translate_legacy(text, 'en', 'auto', kwargs)
 
         return self.extract_source_language_and_confidence(data, response)
 
     async def __aenter__(self):
-        # Initialize the httpx.AsyncClient here
-        self.client = self._create_client()
-
-        if self.proxies is not None:
-            self.client.proxies = self.proxies
-
-        self.client.headers.update({
-            'User-Agent': self.user_agent,
-            'Referer': 'https://translate.google.com',
-        })
-
-        if self.timeout is not None:
-            self.client.timeout = self.timeout
-
+        # Lazily initialize the client so it can be cleanly closed on exit.
+        self._ensure_client()
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        # Close the httpx.AsyncClient when exiting the context
-        await self.client.aclose()
+        # Close the httpx.AsyncClient when exiting the context.
+        # Reset fields so the instance can be re-used with a fresh client on the next enter/use.
+        if self.client is not None:
+            await self.client.aclose()
+        self.client = None
+        self.token_acquirer = None
 
     async def translate_legacy(self, text, dest='en', src='auto', **kwargs):
         """Translate text from source language to destination language
@@ -189,6 +193,7 @@ class AsyncTranslator(BaseTranslator):
             jumps over  ->  이상 점프
             the lazy dog  ->  게으른 개
         """
+        self._ensure_client()
         src, dest = self.validate_normalize_src_dest(src, dest)
 
         if isinstance(text, list):
@@ -200,6 +205,6 @@ class AsyncTranslator(BaseTranslator):
                 result.append(translated)
             return result
 
-        data, response = self._translate_legacy(text, dest, src, kwargs)
+        data, response = await self._translate_legacy(text, dest, src, kwargs)
 
         return self.parse_legacy_response(data, src, dest, text, response)
